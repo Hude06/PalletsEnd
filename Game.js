@@ -40,6 +40,7 @@ class Player {
         this.Colored = 0;
         //X Y WIDTH and HEIGHT
         this.bounds = new Rect(canvas.width/2-16,canvas.height/2-16,32,32)
+        this.ShadowBounds = new Rect(10,canvas.height/2-16,10,10);
         this.EverythingElseX = 0;
         this.EverythingElseY = 0;
         this.Shadow = new Image();
@@ -56,25 +57,28 @@ class Player {
         //Player Direction
         this.direction = "left"
         this.moving = false;
-        this.shadowHeight = -12
-        this.jumping = false;
-        this.jumpingUP = false;
-        this.jumpingDown = false;
         this.jumpingSpeed = 1;
         this.Bucket = null
+        this.grounded = true;
+        this.gravity = 1;
+        this.velocity = 1;
     }
     draw() {
         if (this.Bucket !== null) {
-            ctx.fillRect(this.bounds.x+20,this.bounds.y,mouse.mouseX-895,2)
+            ctx.fillRect(this.bounds.x+20,this.bounds.y,mouse.mouseX-900,2)
         }
         ctx.imageSmoothingEnabled = false;
         if (this.Colored === 1) {
             this.sprite.src = "./Assets/PlayerHands.png"
         }
         ctx.drawImage(this.sprite,this.bounds.x,this.bounds.y,this.bounds.w,this.bounds.h)
-        ctx.drawImage(this.Shadow,this.bounds.x,this.bounds.y+this.bounds.h + this.shadowHeight,this.bounds.w,this.bounds.h)
+        ctx.drawImage(this.Shadow,this.bounds.x,this.ShadowBounds.y+this.bounds.h-10,this.bounds.w,this.bounds.h)
     }
     update() {
+        if (this.grounded === false) {
+            this.velocity += this.gravity;
+            this.bounds.y += this.velocity;
+        }
         if (this.Bucket !== null) {
             if (this.Colored <= 0) {
                 this.Colored += 1;
@@ -91,49 +95,42 @@ class Player {
                 console.log(this.Bucket.bounds.x,this.Bucket.bounds.y)
             }
         }
-        if (currentKey.get(" ")) {
-            this.jumping = true
-            this.jumpingUP = true
+        if (this.ShadowBounds.y === this.bounds.y) {
+            console.log("GROUNDED")
+            this.grounded = true;
         }
-        if (this.jumping) {
-            if (this.jumpingUP) {
-                this.shadowHeight += this.jumpingSpeed;
-                console.log("UP")
-            }
-            if (this.shadowHeight >= 2) {
-                this.jumpingDown = true
-            } 
-            if (this.jumpingDown) {
-                this.jumpingUP = false
-                this.shadowHeight -= this.jumpingSpeed/2
-                console.log("Down")
-            }
-            console.log(this.shadowHeight)
-            if (this.shadowHeight <= -12) {
-                console.log("DOne")
-                this.jumping = false                
+        if (this.grounded) {
+            if (currentKey.get(" ")) {
+                this.velocity -= 10;
+                this.grounded = false;
             }
         }
-        if (currentKey.get("w") || currentKey.get("ArrowUp")) {
-            this.bounds.y -= this.speed
-            this.direction = "forward"
-            this.sprite.src = "./Assets/PlayerBack.png"
-        }
-        if (currentKey.get("s") || currentKey.get("ArrowDown")) {
-            this.bounds.y += this.speed
-            this.direction = "back"
-            this.sprite.src = "./Assets/Player.png"
-        }
-        if (currentKey.get("a") || currentKey.get("ArrowLeft")) {
-            this.bounds.x -= this.speed
-            this.direction = "left"
-            this.sprite.src = "./Assets/PlayerLEFT.png"
-        }
-        if (currentKey.get("d") || currentKey.get("ArrowRight")) {
-            this.bounds.x += this.speed
-            this.direction = "right"
-            this.sprite.src = "./Assets/Player.png"
-        }
+        if (this.grounded) {
+            if (currentKey.get("w") || currentKey.get("ArrowUp")) {
+                this.bounds.y -= this.speed
+                this.direction = "forward"
+                this.sprite.src = "./Assets/PlayerBack.png"
+                this.ShadowBounds.y = this.bounds.y
+            }
+            if (currentKey.get("s") || currentKey.get("ArrowDown")) {
+                this.bounds.y += this.speed
+                this.direction = "back"
+                this.sprite.src = "./Assets/Player.png"
+                this.ShadowBounds.y = this.bounds.y
+            }
+            if (currentKey.get("a") || currentKey.get("ArrowLeft")) {
+                this.bounds.x -= this.speed
+                this.direction = "left"
+                this.sprite.src = "./Assets/PlayerLEFT.png"
+                this.ShadowBounds.x = this.bounds.x
+            }
+            if (currentKey.get("d") || currentKey.get("ArrowRight")) {
+                this.bounds.x += this.speed
+                this.direction = "right"
+                this.sprite.src = "./Assets/Player.png"
+                this.ShadowBounds.x  = this.bounds.x
+            }
+        }   
     }
     collsion() {
         if (this.bounds.intersects(bucket.bounds) || bucket.bounds.intersects(this.bounds)) {
