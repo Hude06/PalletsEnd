@@ -8,7 +8,6 @@ class MousePositionManager {
       this.mouseY = 0;
       document.addEventListener('mousemove', this.updateMousePosition.bind(this));
     }
-  
     updateMousePosition(event) {
         // Update the mouse position variables
         let rect = event.target.getBoundingClientRect()
@@ -21,8 +20,7 @@ class MousePositionManager {
         this.mouseX = x -5
         this.mouseY = y -5
     }
-  }
-
+}
 // Add an event listener to the document to listen for mousemove events
 class Bucket {
     constructor() {
@@ -150,12 +148,22 @@ function keyboardInit() {
         currentKey.set(event.key, false);
     });
 }
+function draw() {
+    player.draw();
+
+    bucket.draw();
+
+}
 function loop() {
     ctx.clearRect(0,0,canvas.width,canvas.height)
-    player.draw();
     player.update();
     player.collsion();
-    bucket.draw();
+    const cameraX = canvas.width / 2 - player.bounds.x;
+    const cameraY = canvas.height / 2 - player.bounds.y;
+    ctx.save();
+    ctx.translate(cameraX, cameraY);
+    draw();
+    ctx.restore();
     requestAnimationFrame(loop)
 }
 function init() {
