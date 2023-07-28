@@ -2,6 +2,8 @@ import { Rect } from "./RectUtils.js";
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d")
 let currentKey = new Map();
+let background = new Image();
+background.src = "./Assets/map.png"
 class MousePositionManager {
     constructor() {
       this.mouseX = 0;
@@ -21,7 +23,6 @@ class MousePositionManager {
         this.mouseY = y -5
     }
 }
-// Add an event listener to the document to listen for mousemove events
 class Bucket {
     constructor() {
         this.bounds = new Rect(600,200,32,32)
@@ -149,10 +150,10 @@ function keyboardInit() {
     });
 }
 function draw() {
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(background,-20,-20,480*6,320*6)
     player.draw();
-
     bucket.draw();
-
 }
 function loop() {
     ctx.clearRect(0,0,canvas.width,canvas.height)
