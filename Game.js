@@ -45,7 +45,7 @@ class Player {
         this.Shadow = new Image();
         this.Shadow.src = "./Assets/PlayerShadow.png"
         //PLAYER SPEED
-        this.speed = 1;
+        this.speed = 1.5;
         //PLATER HEALTH
         this.health = 10
         //Player Color For a Rectangle
