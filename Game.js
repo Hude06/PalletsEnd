@@ -1,7 +1,9 @@
 import { Rect } from "./RectUtils.js";
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d")
-let currentKey = new Map();
+let currentKey = new Map()
+let navKey = new Map();
+
 let background = new Image();
 background.src = "./Assets/map.png"
 class MousePositionManager {
@@ -34,6 +36,35 @@ class Bucket {
         ctx.drawImage(this.sprite,this.bounds.x,this.bounds.y,this.bounds.w,this.bounds.h)
     }
 }
+class GameMap {
+    constructor() {
+        this.visable = false;
+        this.clicked = false;
+        this.bounds = new Rect(50,50,canvas.width-130,canvas.height-140)
+    }
+    draw() {
+        if (this.visable) {
+            ctx.fillStyle = "white"
+            ctx.fillRect(this.bounds.x,this.bounds.y,this.bounds.w,this.bounds.h)
+        }
+    }
+    update() {
+        console.log(this.clicked)
+
+        if (navKey.get("e")) {
+            this.clicked = true
+        }
+        if (this.clicked) {
+            this.visable =! this.visable
+            this.clicked = false;
+        }
+        if (this.visable) {
+            player.moveAble = false
+        } else {
+            player.moveAble = true
+        }
+    }
+}
 class Player {
     constructor() {
         this.Colored = 0;
@@ -61,6 +92,7 @@ class Player {
         this.grounded = true;
         this.gravity = 1;
         this.velocity = 1;
+        this.moveAble = true;
     }
     draw() {
         if (this.Bucket !== null) {
@@ -91,43 +123,45 @@ class Player {
             } else {
                 this.Bucket.bounds.x = this.bounds.x-5
                 this.Bucket.bounds.y = this.bounds.y+20
-                console.log(this.Bucket.bounds.x,this.Bucket.bounds.y)
             }
         }
         if (this.ShadowBounds.y === this.bounds.y) {
-            console.log("GROUNDED")
             this.grounded = true;
         }
         if (this.grounded) {
-            if (currentKey.get(" ")) {
-                this.velocity -= 10;
-                this.grounded = false;
+            if (this.moveAble) {
+                if (currentKey.get(" ")) {
+                    this.velocity -= 10;
+                    this.grounded = false;
+                }
             }
         }
         if (this.grounded) {
-            if (currentKey.get("w") || currentKey.get("ArrowUp")) {
-                this.bounds.y -= this.speed
-                this.direction = "forward"
-                this.sprite.src = "./Assets/PlayerBack.png"
-                this.ShadowBounds.y = this.bounds.y
-            }
-            if (currentKey.get("s") || currentKey.get("ArrowDown")) {
-                this.bounds.y += this.speed
-                this.direction = "back"
-                this.sprite.src = "./Assets/Player.png"
-                this.ShadowBounds.y = this.bounds.y
-            }
-            if (currentKey.get("a") || currentKey.get("ArrowLeft")) {
-                this.bounds.x -= this.speed
-                this.direction = "left"
-                this.sprite.src = "./Assets/PlayerLEFT.png"
-                this.ShadowBounds.x = this.bounds.x
-            }
-            if (currentKey.get("d") || currentKey.get("ArrowRight")) {
-                this.bounds.x += this.speed
-                this.direction = "right"
-                this.sprite.src = "./Assets/Player.png"
-                this.ShadowBounds.x  = this.bounds.x
+            if (this.moveAble) {
+                if (currentKey.get("w") || currentKey.get("ArrowUp")) {
+                    this.bounds.y -= this.speed
+                    this.direction = "forward"
+                    this.sprite.src = "./Assets/PlayerBack.png"
+                    this.ShadowBounds.y = this.bounds.y
+                }
+                if (currentKey.get("s") || currentKey.get("ArrowDown")) {
+                    this.bounds.y += this.speed
+                    this.direction = "back"
+                    this.sprite.src = "./Assets/Player.png"
+                    this.ShadowBounds.y = this.bounds.y
+                }
+                if (currentKey.get("a") || currentKey.get("ArrowLeft")) {
+                    this.bounds.x -= this.speed
+                    this.direction = "left"
+                    this.sprite.src = "./Assets/PlayerLEFT.png"
+                    this.ShadowBounds.x = this.bounds.x
+                }
+                if (currentKey.get("d") || currentKey.get("ArrowRight")) {
+                    this.bounds.x += this.speed
+                    this.direction = "right"
+                    this.sprite.src = "./Assets/Player.png"
+                    this.ShadowBounds.x  = this.bounds.x
+                }
             }
         }   
     }
@@ -140,13 +174,18 @@ class Player {
 let bucket = new Bucket();
 let player = new Player();
 let mouse = new MousePositionManager();
+let map = new GameMap();
 let EveryObject = [bucket]
 function keyboardInit() {
     window.addEventListener("keydown", function (event) {
         currentKey.set(event.key, true);
+        navKey.set(event.key, true);
+
     });
     window.addEventListener("keyup", function (event) {
         currentKey.set(event.key, false);
+        navKey.set(event.key, false);
+
     });
 }
 function draw() {
@@ -154,10 +193,12 @@ function draw() {
     ctx.drawImage(background,-20,-20,480*6,320*6)
     player.draw();
     bucket.draw();
+    map.draw();
 }
 function loop() {
     ctx.clearRect(0,0,canvas.width,canvas.height)
     player.update();
+    map.update();
     player.collsion();
     const cameraX = canvas.width / 2 - player.bounds.x;
     const cameraY = canvas.height / 2 - player.bounds.y;
@@ -165,6 +206,7 @@ function loop() {
     ctx.translate(cameraX, cameraY);
     draw();
     ctx.restore();
+    navKey.clear();
     requestAnimationFrame(loop)
 }
 function init() {
