@@ -4,8 +4,6 @@ let ctx = canvas.getContext("2d")
 let currentKey = new Map()
 let navKey = new Map();
 
-let background = new Image();
-background.src = "./Assets/map.png"
 class MousePositionManager {
     constructor() {
       this.mouseX = 0;
@@ -51,7 +49,6 @@ class GameMap {
         }
     }
     update() {
-        console.log(this.clicked)
         if (navKey.get("e")) {
             this.clicked = true
         }
@@ -172,11 +169,60 @@ class Player {
         }
     }
 }
+class Grid {
+    constructor(w,h) {
+        this.width = w
+        this.height = h
+        this.array = []
+        for(let j = 0; j<this.height; j++) {
+            let row = []
+            for(let i = 0; i<this.width; i++) {
+                row[i] = 0
+            }
+            this.array[j] = row
+        }
+    }
+    getAt(x,y) {
+        return this.array[y][x]
+    }
+    setAt(x,y,v) {
+        this.array[y][x] = v
+    }
+    fill(color) {
+        for (let j=0; j<this.height; j++) {
+            for (let i=0; i<this.width; i++) {
+                this.setAt(i,j,color)
+            }
+        }
+    }
+    draw() {
+        for (let h = 0; h < this.height; h++) {
+            for (let w = 0; w < this.width; w++) {
+                if (grid.getAt(w,h).toLowerCase() === 'black') {
+                    ctx.fillStyle = "black"
+                    console.log(w,h)
+                    ctx.fillRect(w*20,h*20,10,10)
+                }
+                if (grid.getAt(w,h).toLowerCase() === 'red') {
+                    console.log(w,h)
+                    ctx.fillStyle = "red"
+                    ctx.fillRect(w*20,h*20,10,10)
+                }
+                if (grid.getAt(w,h).toLowerCase() === 'white') {
+                    console.log(w,h)
+                    ctx.fillStyle = "white"
+                    ctx.fillRect(w*20,h*20,10,10)
+                }
+
+            }
+        } 
+    }
+}
+let grid = new Grid(10,10);
 let bucket = new Bucket();
 let player = new Player();
 let mouse = new MousePositionManager();
 let map = new GameMap();
-let EveryObject = [bucket]
 function keyboardInit() {
     window.addEventListener("keydown", function (event) {
         currentKey.set(event.key, true);
@@ -191,23 +237,28 @@ function keyboardInit() {
 }
 function draw() {
     ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(background,-20,-20,480*6,320*6)
     player.draw();
     bucket.draw();
-    map.draw();
+}
+function Camera() {
+    const cameraX = canvas.width / 2 - player.bounds.x;
+    const cameraY = canvas.height / 2 - player.bounds.y;
+    ctx.save();
+    ctx.translate(cameraX, cameraY);
 }
 function loop() {
     ctx.clearRect(0,0,canvas.width,canvas.height)
     player.update();
     map.update();
     player.collsion();
-    
-    const cameraX = canvas.width / 2 - player.bounds.x;
-    const cameraY = canvas.height / 2 - player.bounds.y;
-    ctx.save();
-    ctx.translate(cameraX, cameraY);
+    Camera();
     draw();
-    ctx.restore();
+    grid.fill('black')
+    grid.setAt(2,2,"red")
+    grid.setAt(5,2,"white")
+
+    grid.draw();
+    ctx.restore(); 
     navKey.clear();
     requestAnimationFrame(loop)
 }
