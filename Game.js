@@ -40,17 +40,18 @@ class GameMap {
     constructor() {
         this.visable = false;
         this.clicked = false;
-        this.bounds = new Rect(50,50,canvas.width-130,canvas.height-140)
+        this.bounds = new Rect(50,50,canvas.width-100,canvas.height-85)
     }
     draw() {
         if (this.visable) {
             ctx.fillStyle = "white"
-            ctx.fillRect(this.bounds.x,this.bounds.y,this.bounds.w,this.bounds.h)
+            const cameraX = canvas.width / 2 - player.bounds.x;
+            const cameraY = canvas.height / 2 - player.bounds.y;
+            ctx.fillRect(this.bounds.x-cameraX,this.bounds.y-cameraY,this.bounds.w,this.bounds.h)
         }
     }
     update() {
         console.log(this.clicked)
-
         if (navKey.get("e")) {
             this.clicked = true
         }
@@ -200,6 +201,7 @@ function loop() {
     player.update();
     map.update();
     player.collsion();
+    
     const cameraX = canvas.width / 2 - player.bounds.x;
     const cameraY = canvas.height / 2 - player.bounds.y;
     ctx.save();
