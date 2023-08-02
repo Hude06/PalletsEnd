@@ -4,6 +4,7 @@ let ctx = canvas.getContext("2d")
 let currentKey = new Map()
 let navKey = new Map();
 
+
 class MousePositionManager {
     constructor() {
       this.mouseX = 0;
@@ -137,26 +138,30 @@ class Player {
         if (this.grounded) {
             if (this.moveAble) {
                 if (currentKey.get("w") || currentKey.get("ArrowUp")) {
-                    this.bounds.y -= this.speed
-                    this.direction = "forward"
+                    if (grid.canMove(this,"forward")) {
+                        this.bounds.y -= this.speed
+                    }
                     this.sprite.src = "./Assets/PlayerBack.png"
                     this.ShadowBounds.y = this.bounds.y
                 }
                 if (currentKey.get("s") || currentKey.get("ArrowDown")) {
-                    this.bounds.y += this.speed
-                    this.direction = "back"
+                    if (grid.canMove(this,"down")) {
+                        this.bounds.y += this.speed
+                    }                    
                     this.sprite.src = "./Assets/Player.png"
                     this.ShadowBounds.y = this.bounds.y
                 }
                 if (currentKey.get("a") || currentKey.get("ArrowLeft")) {
-                    this.bounds.x -= this.speed
-                    this.direction = "left"
+                    if (grid.canMove(this,"left")) {
+                        this.bounds.x -= this.speed
+                    }  
                     this.sprite.src = "./Assets/PlayerLEFT.png"
                     this.ShadowBounds.x = this.bounds.x
                 }
                 if (currentKey.get("d") || currentKey.get("ArrowRight")) {
-                    this.bounds.x += this.speed
-                    this.direction = "right"
+                    if (grid.canMove(this,"right")) {
+                        this.bounds.x += this.speed
+                    }                      
                     this.sprite.src = "./Assets/Player.png"
                     this.ShadowBounds.x  = this.bounds.x
                 }
@@ -167,6 +172,9 @@ class Player {
         if (this.bounds.intersects(bucket.bounds) || bucket.bounds.intersects(this.bounds)) {
             this.Bucket = bucket
         }
+        if (grid.getAt(Math.round(this.bounds.x/divider),Math.round(this.bounds.y/divider)) === "red") {
+            console.log("Hit Red")
+        }
     }
 }
 class Grid {
@@ -174,6 +182,7 @@ class Grid {
         this.width = w
         this.height = h
         this.array = []
+        this.tileSize = 25
         for(let j = 0; j<this.height; j++) {
             let row = []
             for(let i = 0; i<this.width; i++) {
@@ -200,25 +209,45 @@ class Grid {
             for (let w = 0; w < this.width; w++) {
                 if (grid.getAt(w,h).toLowerCase() === 'black') {
                     ctx.fillStyle = "black"
-                    console.log(w,h)
-                    ctx.fillRect(w*20,h*20,10,10)
+                    ctx.fillRect(w*(this.tileSize),h*(this.tileSize),this.tileSize,this.tileSize)
                 }
                 if (grid.getAt(w,h).toLowerCase() === 'red') {
-                    console.log(w,h)
                     ctx.fillStyle = "red"
-                    ctx.fillRect(w*20,h*20,10,10)
+                    ctx.fillRect(w*(this.tileSize),h*(this.tileSize),this.tileSize,this.tileSize)
                 }
                 if (grid.getAt(w,h).toLowerCase() === 'white') {
-                    console.log(w,h)
                     ctx.fillStyle = "white"
-                    ctx.fillRect(w*20,h*20,10,10)
+                    ctx.fillRect(w*(this.tileSize),h*(this.tileSize),this.tileSize,this.tileSize)
                 }
 
             }
         } 
     }
+    canMove(player,direction) {
+        if (direction.toLowerCase() === "forward") {
+            if (this.getAt(Math.round(player.bounds.x/divider),Math.round(player.bounds.y/divider)-1) === "black") {
+                return true;
+            }
+        }
+        if (direction.toLowerCase() === "left") {
+            if (this.getAt(Math.round(player.bounds.x/divider)-1,Math.round(player.bounds.y/divider)) === "black") {
+                return true;
+            }
+        }
+        if (direction.toLowerCase() === "down") {
+            if (this.getAt(Math.round(player.bounds.x/divider),Math.round(player.bounds.y/divider)+1) === "black") {
+                return true;
+            }
+        }
+        if (direction.toLowerCase() === "right") {
+            if (this.getAt(Math.round(player.bounds.x/divider)+1,Math.round(player.bounds.y/divider)) === "black") {
+                return true;
+            }
+        }
+    }
 }
-let grid = new Grid(10,10);
+let grid = new Grid(50,25);
+const divider = grid.tileSize
 let bucket = new Bucket();
 let player = new Player();
 let mouse = new MousePositionManager();
@@ -248,16 +277,16 @@ function Camera() {
 }
 function loop() {
     ctx.clearRect(0,0,canvas.width,canvas.height)
-    player.update();
-    map.update();
-    player.collsion();
-    Camera();
-    draw();
     grid.fill('black')
     grid.setAt(2,2,"red")
     grid.setAt(5,2,"white")
-
     grid.draw();
+    player.update();
+    map.update();
+    player.collsion();
+    // Camera();
+    draw();
+
     ctx.restore(); 
     navKey.clear();
     requestAnimationFrame(loop)
