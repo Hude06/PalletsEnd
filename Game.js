@@ -3,8 +3,6 @@ let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d")
 let currentKey = new Map()
 let navKey = new Map();
-
-
 class MousePositionManager {
     constructor() {
       this.mouseX = 0;
@@ -25,8 +23,8 @@ class MousePositionManager {
     }
 }
 class Bucket {
-    constructor() {
-        this.bounds = new Rect(600,200,32,32)
+    constructor(x,y) {
+        this.bounds = new Rect(x-2,y-5,32,32)
         this.sprite = new Image();
         this.sprite.src = "./Assets/Bucket.png"
     }
@@ -174,33 +172,47 @@ class Grid {
                     ctx.fillStyle = "white"
                     ctx.fillRect(w*(this.tileSize),h*(this.tileSize),this.tileSize,this.tileSize)
                 }
+                if (grid.getAt(w,h).toLowerCase() === 'bucket') {
+                    ctx.fillStyle = "black"
+                    ctx.fillRect(w*(this.tileSize),h*(this.tileSize),this.tileSize,this.tileSize)
+                    buckets.push(new Bucket(w*this.tileSize,h*this.tileSize))
+                }
 
             }
         } 
     }
     canMove(player,direction) {
         if (direction.toLowerCase() === "forward") {
-            if (this.getAt(Math.round(player.bounds.x),Math.round(player.bounds.y)-1) === "black") {
+            if (this.getAt((player.bounds.x),(player.bounds.y)-1) === "black") {
                 return true;
+            }
+            if (this.getAt((player.bounds.x),(player.bounds.y)-1) === "bucket") {
             }
         }
         if (direction.toLowerCase() === "left") {
-            if (this.getAt(Math.round(player.bounds.x)-1,Math.round(player.bounds.y)) === "black") {
+            if (this.getAt((player.bounds.x)-1,(player.bounds.y)) === "black") {
                 return true;
+            }
+            if (this.getAt((player.bounds.x)-1,(player.bounds.y)) === "bucket") {
             }
         }
         if (direction.toLowerCase() === "down") {
-            if (this.getAt(Math.round(player.bounds.x),Math.round(player.bounds.y)+1) === "black") {
+            if (this.getAt((player.bounds.x),(player.bounds.y)+1) === "black") {
                 return true;
+            }
+            if (this.getAt((player.bounds.x),(player.bounds.y)+1) === "bucket") {
             }
         }
         if (direction.toLowerCase() === "right") {
-            if (this.getAt(Math.round(player.bounds.x)+1,Math.round(player.bounds.y)) === "black") {
+            if (this.getAt((player.bounds.x)+1,(player.bounds.y)) === "black") {
                 return true;
+            }
+            if (this.getAt((player.bounds.x)+1,(player.bounds.y)) === "bucket") {
             }
         }
     }
 }
+let buckets = []
 let grid = new Grid(50,30);
 const divider = grid.tileSize
 let player = new Player();
@@ -221,6 +233,9 @@ function keyboardInit() {
 function draw() {
     ctx.imageSmoothingEnabled = false;
     player.draw();
+    for (let i = 0; i < buckets.length; i++) {
+        buckets[i].draw();
+    }
 }
 function Camera() {
     const cameraX = canvas.width / 2 - player.bounds.x;
