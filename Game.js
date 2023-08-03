@@ -68,14 +68,14 @@ class Player {
     constructor() {
         this.Colored = 0;
         //X Y WIDTH and HEIGHT
-        this.bounds = new Rect(canvas.width/2-16,canvas.height/2-16,32,32)
+        this.bounds = new Rect(1,1,32,32)
         this.ShadowBounds = new Rect(10,canvas.height/2-16,10,10);
         this.EverythingElseX = 0;
         this.EverythingElseY = 0;
         this.Shadow = new Image();
         this.Shadow.src = "./Assets/PlayerShadow.png"
         //PLAYER SPEED
-        this.speed = 1.5;
+        this.speed = 1;
         //PLATER HEALTH
         this.health = 10
         //Player Color For a Rectangle
@@ -101,8 +101,8 @@ class Player {
         if (this.Colored === 1) {
             this.sprite.src = "./Assets/PlayerHands.png"
         }
-        ctx.drawImage(this.sprite,this.bounds.x,this.bounds.y,this.bounds.w,this.bounds.h)
-        ctx.drawImage(this.Shadow,this.bounds.x,this.ShadowBounds.y+this.bounds.h-10,this.bounds.w,this.bounds.h)
+        ctx.drawImage(this.sprite,Math.round(player.bounds.x*divider)-3,Math.round(player.bounds.y*divider),this.bounds.w,this.bounds.h)
+        ctx.drawImage(this.Shadow,Math.round(player.bounds.x*divider)-3,this.ShadowBounds.y*divider+this.bounds.h-10,this.bounds.w,this.bounds.h)
     }
     update() {
         if (this.grounded === false) {
@@ -182,7 +182,7 @@ class Grid {
         this.width = w
         this.height = h
         this.array = []
-        this.tileSize = 25
+        this.tileSize = 30
         for(let j = 0; j<this.height; j++) {
             let row = []
             for(let i = 0; i<this.width; i++) {
@@ -225,28 +225,28 @@ class Grid {
     }
     canMove(player,direction) {
         if (direction.toLowerCase() === "forward") {
-            if (this.getAt(Math.round(player.bounds.x/divider),Math.round(player.bounds.y/divider)-1) === "black") {
+            if (this.getAt(Math.round(player.bounds.x),Math.round(player.bounds.y)-1) === "black") {
                 return true;
             }
         }
         if (direction.toLowerCase() === "left") {
-            if (this.getAt(Math.round(player.bounds.x/divider)-1,Math.round(player.bounds.y/divider)) === "black") {
+            if (this.getAt(Math.round(player.bounds.x)-1,Math.round(player.bounds.y)) === "black") {
                 return true;
             }
         }
         if (direction.toLowerCase() === "down") {
-            if (this.getAt(Math.round(player.bounds.x/divider),Math.round(player.bounds.y/divider)+1) === "black") {
+            if (this.getAt(Math.round(player.bounds.x),Math.round(player.bounds.y)+1) === "black") {
                 return true;
             }
         }
         if (direction.toLowerCase() === "right") {
-            if (this.getAt(Math.round(player.bounds.x/divider)+1,Math.round(player.bounds.y/divider)) === "black") {
+            if (this.getAt(Math.round(player.bounds.x)+1,Math.round(player.bounds.y)) === "black") {
                 return true;
             }
         }
     }
 }
-let grid = new Grid(50,25);
+let grid = new Grid(50,30);
 const divider = grid.tileSize
 let bucket = new Bucket();
 let player = new Player();
@@ -289,6 +289,7 @@ function loop() {
 
     ctx.restore(); 
     navKey.clear();
+    currentKey.clear();
     requestAnimationFrame(loop)
 }
 function init() {
